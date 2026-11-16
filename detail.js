@@ -1,7 +1,3 @@
-// PAGINA DEL PROFILO: legge il parametro "id" dall'URL (detail.html?id=12),
-// cerca quella riga nel dataset e mostra tutti i dati del profilo.
-
-// Variabili condivise: i valori letti qui possono essere usati da più funzioni.
 let data;
 let currentRow = -1;
 let channel = "";
@@ -16,7 +12,6 @@ let backgroundColor = '#0E0F1A';
 let textColor = '#F2F2F7';
 let mutedColor = '#8A8FA8';
 
-// Stessi colori della pagina d'insieme
 let categoryColors = {
   "Musica": '#FF5D73',
   "Sport": '#3DA5FF',
@@ -26,10 +21,8 @@ let categoryColors = {
   "Altro": '#9AA3B5',
 };
 
-// Margine attorno al contenuto
 let margin = 40;
 
-// Le colonne numeriche del CSV che mostro nell'elenco (etichetta + nome della colonna)
 let fields = [
   ["Influence score", "influence_score"],
   ["Follower", "followers"],
@@ -41,24 +34,19 @@ let fields = [
 ];
 
 async function setup() {
-  // Crea l'area di disegno con le dimensioni della finestra del browser.
   createCanvas(windowWidth, windowHeight);
 
-  // loadTable(percorso, separatore, opzioni): "header" usa la prima riga come nomi delle colonne.
   data = await loadTable("instagram_global_influencers_2026.csv", ",", "header");
 
-  // Legge il parametro della pagina: detail.html?id=12
   let params = new URLSearchParams(window.location.search);
   let id = params.get("id");
 
-  // Filtra il dataset: cerca la riga con il rank richiesto.
   for (let rowNumber = 0; rowNumber < data.getRowCount(); rowNumber++) {
     if (data.getString(rowNumber, "rank") === id) {
       currentRow = rowNumber;
     }
   }
 
-  // Se la riga esiste, prepara i dati da mostrare.
   if (currentRow >= 0) {
     channel = data.getString(currentRow, "channel_info");
     rankValue = data.getString(currentRow, "rank");
@@ -66,7 +54,7 @@ async function setup() {
     category = data.getString(currentRow, "category");
     macro = macroCategory(category);
 
-    // Per ogni colonna: valore del profilo e sua posizione tra i profili (1 = valore più alto).
+    // valore del profilo e sua posizione tra i profili 
     for (let field of fields) {
       let value = data.getNum(currentRow, field[1]);
       let position = 1;
@@ -82,7 +70,6 @@ async function setup() {
       });
     }
 
-    // Dato calcolato: i nuovi post fanno più o meno like della media?
     let delta = data.getNum(currentRow, "new_post_avg_likes") / data.getNum(currentRow, "avg_likes") - 1;
     rows.push({
       label: "Nuovi post rispetto alla media",
@@ -95,7 +82,7 @@ async function setup() {
 function draw() {
   background(backgroundColor);
 
-  // Pulsante per tornare alla griglia: cambia aspetto se il mouse è sopra.
+  // pulsante per tornare alla griglia, cambia aspetto se il mouse è sopra.
   textSize(14);
   textAlign(LEFT, TOP);
   let backLabel = "←  Tutti i profili";
@@ -106,7 +93,6 @@ function draw() {
   text(backLabel, margin, 30);
   cursor(overBack ? HAND : ARROW);
 
-  // Se il parametro non corrisponde a nessuna riga, lo spiego.
   if (currentRow < 0) {
     fill(textColor);
     textSize(24);
@@ -114,7 +100,7 @@ function draw() {
     return;
   }
 
-  // ----- Colonna sinistra: icona grande, nome, posizione e categoria -----
+  // colonna sinistra
   let iconSize = min(width * 0.2, height * 0.3, 200);
   let iconX = width * 0.26;
   let iconY = height * 0.38;
@@ -133,7 +119,7 @@ function draw() {
   fill(categoryColors[macro]);
   text(category, iconX, iconY + iconSize / 2 + 110);
 
-  // ----- Colonna destra: dati in una griglia di 2 colonne -----
+  // colonna destra
   let listX = width * 0.5;
   let listWidth = width - listX - margin;
   let blockCols = 2;
@@ -153,7 +139,7 @@ function draw() {
     let x = listX + (i % blockCols) * blockWidth;
     let y = 130 + floor(i / blockCols) * blockHeight;
 
-    // Etichetta (piccola), valore (grande) e posizione nel dataset (piccola)
+    // etichetta, valore e posizione nel dataset 
     fill(mutedColor);
     textSize(13);
     text(rows[i].label, x, y);
@@ -171,7 +157,7 @@ function draw() {
 
 }
 
-// Disegna l'icona Instagram: quadrato arrotondato, fotocamera, obiettivo e flash.
+// icona Instagram
 function drawInstagramIcon(cx, cy, s, hex) {
   noStroke();
   fill(hex);
@@ -188,7 +174,7 @@ function drawInstagramIcon(cx, cy, s, hex) {
   circle(cx + s * 0.19, cy - s * 0.19, max(2, s * 0.07));
 }
 
-// Raggruppa le 36 categorie del CSV in 6 gruppi, uno per colore.
+// raggruppa 
 function macroCategory(categoryName) {
   if (categoryName.startsWith("Music")) return "Musica";
   if (categoryName.startsWith("Sport")) return "Sport";
@@ -202,7 +188,7 @@ function macroCategory(categoryName) {
   return "Altro";
 }
 
-// Scrive un valore in forma leggibile: 680000000 -> "680 M"
+// valore in forma leggibile
 function formatNumber(key, value) {
   if (key === "60_day_eng_rate") return value.toFixed(2) + " %";
   if (key === "influence_score") return value + " / 100";
@@ -212,7 +198,7 @@ function formatNumber(key, value) {
 }
 
 function mousePressed() {
-  // Click sul pulsante: torna alla pagina d'insieme.
+  // torna alla pagina d'insieme.
   if (overBack) {
     window.location.href = "index.html";
   }
